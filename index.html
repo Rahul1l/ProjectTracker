@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px;
+            max-width: 500px;
+            width: 100%;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .dashboard-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1400px;
+            width: 100%;
+            margin: 20px auto;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            color: white;
+        }
+
+        .btn-admin {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-user {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .btn-user:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.6);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            box-shadow: 0 4px 15px rgba(235, 51, 73, 0.4);
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(235, 51, 73, 0.6);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .btn-edit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            padding: 10px 20px;
+            font-size: 0.95em;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .back-link:hover {
+            color: #764ba2;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab:hover {
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h2 {
+            margin: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin: 30px 0;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-header h3 {
+            margin: 0;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 10px;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            border-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .calendar-day.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .calendar-day.has-entry::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            width: 6px;
+            height: 6px;
+            background: #38ef7d;
+            border-radius: 50%;
+        }
+
+        .calendar-day.empty {
+            border: none;
+            cursor: default;
+        }
+
+        .calendar-weekday {
+            font-weight: 600;
+            color: #667eea;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2em;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .project-group {
+            margin-bottom: 40px;
+        }
+
+        .project-group h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .trainer-group {
+            margin-bottom: 40px;
+        }
+
+        .trainer-group h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        @media (max-width: 768px) {
+            .container, .dashboard-container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.6em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            .calendar {
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HOME VIEW -->
+    <div id="home-view" class="view active">
+        <div class="container">
+            <h1>📊 Project Tracker</h1>
+            <p>Choose your role to continue</p>
+            
+            <div class="button-group">
+                <button onclick="showView('admin-login-view')" class="btn btn-admin">
+                    <span class="icon">👨‍💼</span> Admin Login
+                </button>
+                <button onclick="showView('user-login-view')" class="btn btn-user">
+                    <span class="icon">👤</span> Trainer Login
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN VIEW -->
+    <div id="admin-login-view" class="view">
+        <div class="container">
+            <a class="back-link" onclick="showView('home-view')">← Back to Home</a>
+            
+            <h2>👨‍💼 Admin Login</h2>
+            <p class="subtitle">Enter your credentials to continue</p>
+            
+            <div id="admin-error-message" class="error-message"></div>
+            <div id="admin-success-message" class="success-message"></div>
+            
+            <form id="admin-login-form">
+                <div class="form-group">
+                    <label for="admin-username">Username</label>
+                    <input type="email" id="admin-username" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="admin-password">Password</label>
+                    <input type="password" id="admin-password" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="btn btn-admin" style="width: 100%;">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD VIEW -->
+    <div id="admin-dashboard-view" class="view">
+        <div class="dashboard-container">
+            <div class="header">
+                <h2>👨‍💼 Admin Dashboard</h2>
+                <button onclick="logout()" class="btn btn-secondary">Logout</button>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchAdminTab('user-creation')">User Creation</button>
+                <button class="tab" onclick="switchAdminTab('user-database')">User Database</button>
+                <button class="tab" onclick="switchAdminTab('project-database')">Project Database</button>
+            </div>
+
+            <!-- USER CREATION TAB -->
+            <div id="user-creation-tab" class="tab-content active">
+                <h3>Create New Trainer</h3>
+                
+                <div id="create-trainer-error" class="error-message"></div>
+                <div id="create-trainer-success" class="success-message"></div>
+                
+                <form id="create-trainer-form">
+                    <div class="form-group">
+                        <label for="trainer-name">Trainer Name</label>
+                        <input type="text" id="trainer-name" required placeholder="Enter trainer name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="trainer-password">Password</label>
+                        <input type="password" id="trainer-password" required placeholder="Enter password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">Create Trainer</button>
+                </form>
+            </div>
+
+            <!-- USER DATABASE TAB -->
+            <div id="user-database-tab" class="tab-content">
+                <h3>Trainer Database</h3>
+                <div id="trainers-list">
+                    <p>Loading...</p>
+                </div>
+            </div>
+
+            <!-- PROJECT DATABASE TAB -->
+            <div id="project-database-tab" class="tab-content">
+                <h3>Project Database</h3>
+                <div class="export-buttons">
+                    <button onclick="exportToCSV('admin')" class="btn btn-success">Export to CSV</button>
+                </div>
+                <div id="admin-projects-list">
+                    <p>Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- USER LOGIN VIEW -->
+    <div id="user-login-view" class="view">
+        <div class="container">
+            <a class="back-link" onclick="showView('home-view')">← Back to Home</a>
+            
+            <h2>👤 Trainer Login</h2>
+            <p class="subtitle">Enter your credentials to continue</p>
+            
+            <div id="user-error-message" class="error-message"></div>
+            <div id="user-success-message" class="success-message"></div>
+            
+            <form id="user-login-form">
+                <div class="form-group">
+                    <label for="user-trainer-name">Trainer Name</label>
+                    <input type="text" id="user-trainer-name" required placeholder="Enter your trainer name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-password">Password</label>
+                    <input type="password" id="user-password" required placeholder="Enter your password">
+                </div>
+                
+                <button type="submit" class="btn btn-user" style="width: 100%;">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- USER DASHBOARD VIEW -->
+    <div id="user-dashboard-view" class="view">
+        <div class="dashboard-container">
+            <div class="header">
+                <h2>👤 Project Tracker - <span id="trainer-name-display"></span></h2>
+                <button onclick="logout()" class="btn btn-secondary">Logout</button>
+            </div>
+
+            <div class="calendar-header">
+                <h3 id="current-month-year"></h3>
+                <div class="calendar-nav">
+                    <button onclick="previousMonth()" class="btn btn-secondary">← Previous</button>
+                    <button onclick="nextMonth()" class="btn btn-secondary">Next →</button>
+                </div>
+            </div>
+
+            <div class="calendar" id="calendar"></div>
+
+            <div style="margin-top: 40px;">
+                <h3>Your Projects</h3>
+                <div class="export-buttons">
+                    <button onclick="exportToCSV('trainer')" class="btn btn-success">Export to CSV</button>
+                </div>
+                <div id="user-projects-list">
+                    <p>No projects added yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROJECT ENTRY MODAL -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Project Details</h3>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+
+            <div id="modal-error-message" class="error-message"></div>
+            <div id="modal-success-message" class="success-message"></div>
+
+            <form id="project-form">
+                <input type="hidden" id="project-date">
+                <input type="hidden" id="project-id">
+                
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="text" id="display-date" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="project-name">Project Name</label>
+                    <input type="text" id="project-name" required placeholder="Enter project name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="project-details">Project Details</label>
+                    <textarea id="project-details" required placeholder="Enter project details"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="project-remarks">Remarks</label>
+                    <textarea id="project-remarks" required placeholder="Enter remarks"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%;">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT TRAINER MODAL -->
+    <div id="edit-trainer-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Trainer</h3>
+                <button class="modal-close" onclick="closeEditTrainerModal()">&times;</button>
+            </div>
+
+            <div id="edit-trainer-error" class="error-message"></div>
+            <div id="edit-trainer-success" class="success-message"></div>
+
+            <form id="edit-trainer-form">
+                <input type="hidden" id="edit-trainer-id">
+                
+                <div class="form-group">
+                    <label for="edit-trainer-name-input">Trainer Name</label>
+                    <input type="text" id="edit-trainer-name-input" required placeholder="Enter trainer name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-trainer-password-input">New Password (leave empty to keep current)</label>
+                    <input type="password" id="edit-trainer-password-input" placeholder="Enter new password">
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%;">Update Trainer</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT PROJECT MODAL -->
+    <div id="edit-project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Project</h3>
+                <button class="modal-close" onclick="closeEditProjectModal()">&times;</button>
+            </div>
+
+            <div id="edit-project-error" class="error-message"></div>
+            <div id="edit-project-success" class="success-message"></div>
+
+            <form id="edit-project-form">
+                <input type="hidden" id="edit-project-id-input">
+                
+                <div class="form-group">
+                    <label for="edit-project-date">Date</label>
+                    <input type="date" id="edit-project-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-project-name-input">Project Name</label>
+                    <input type="text" id="edit-project-name-input" required placeholder="Enter project name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-project-details-input">Project Details</label>
+                    <textarea id="edit-project-details-input" required placeholder="Enter project details"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-project-remarks-input">Remarks</label>
+                    <textarea id="edit-project-remarks-input" required placeholder="Enter remarks"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%;">Update Project</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentDate = new Date();
+        let selectedDate = null;
+        let currentUserType = null;
+        let trainerName = null;
+
+        // View management
+        function showView(viewId) {
+            document.querySelectorAll('.view').forEach(view => {
+                view.classList.remove('active');
+            });
+            document.getElementById(viewId).classList.add('active');
+            
+            // Load data when switching to certain views
+            if (viewId === 'admin-dashboard-view') {
+                loadTrainers();
+            } else if (viewId === 'user-dashboard-view') {
+                renderCalendar();
+                loadUserProjects();
+            }
+        }
+
+        // Check session on page load
+        async function checkSession() {
+            try {
+                const response = await fetch('/api/check_session');
+                const data = await response.json();
+                
+                if (data.logged_in) {
+                    if (data.user_type === 'admin') {
+                        currentUserType = 'admin';
+                        showView('admin-dashboard-view');
+                    } else if (data.user_type === 'trainer') {
+                        currentUserType = 'trainer';
+                        trainerName = data.trainer_name;
+                        document.getElementById('trainer-name-display').textContent = trainerName;
+                        showView('user-dashboard-view');
+                    }
+                }
+            } catch (error) {
+                console.error('Session check failed:', error);
+            }
+        }
+
+        // Admin login
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            
+            const errorDiv = document.getElementById('admin-error-message');
+            const successDiv = document.getElementById('admin-success-message');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successDiv.textContent = data.message;
+                    successDiv.style.display = 'block';
+                    currentUserType = 'admin';
+                    setTimeout(() => {
+                        showView('admin-dashboard-view');
+                    }, 1000);
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // User login
+        document.getElementById('user-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const trainerNameInput = document.getElementById('user-trainer-name').value;
+            const password = document.getElementById('user-password').value;
+            
+            const errorDiv = document.getElementById('user-error-message');
+            const successDiv = document.getElementById('user-success-message');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/user/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trainer_name: trainerNameInput, password }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successDiv.textContent = data.message;
+                    successDiv.style.display = 'block';
+                    currentUserType = 'trainer';
+                    trainerName = data.trainer_name;
+                    document.getElementById('trainer-name-display').textContent = trainerName;
+                    setTimeout(() => {
+                        showView('user-dashboard-view');
+                    }, 1000);
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Logout
+        async function logout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+                currentUserType = null;
+                trainerName = null;
+                showView('home-view');
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // Admin tab switching
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            if (tabName === 'user-database') {
+                loadTrainers();
+            } else if (tabName === 'project-database') {
+                loadAdminProjects();
+            }
+        }
+
+        // Create trainer
+        document.getElementById('create-trainer-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const trainerNameInput = document.getElementById('trainer-name').value;
+            const password = document.getElementById('trainer-password').value;
+            
+            const errorDiv = document.getElementById('create-trainer-error');
+            const successDiv = document.getElementById('create-trainer-success');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/admin/create_trainer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ trainer_name: trainerNameInput, password }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successDiv.textContent = data.message;
+                    successDiv.style.display = 'block';
+                    document.getElementById('create-trainer-form').reset();
+                    setTimeout(() => {
+                        successDiv.style.display = 'none';
+                    }, 3000);
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Load trainers
+        async function loadTrainers() {
+            try {
+                const response = await fetch('/api/admin/trainers');
+                const data = await response.json();
+                
+                const listDiv = document.getElementById('trainers-list');
+                
+                if (data.success && data.trainers.length > 0) {
+                    let html = '<table><thead><tr><th>Trainer Name</th><th>Created At</th><th>Actions</th></tr></thead><tbody>';
+                    
+                    data.trainers.forEach(trainer => {
+                        html += `
+                            <tr>
+                                <td>${trainer.trainer_name}</td>
+                                <td>${trainer.created_at}</td>
+                                <td class="actions">
+                                    <button onclick="editTrainer('${trainer._id}', '${trainer.trainer_name}')" class="btn btn-edit">Edit</button>
+                                    <button onclick="deleteTrainer('${trainer._id}')" class="btn btn-danger">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += '</tbody></table>';
+                    listDiv.innerHTML = html;
+                } else {
+                    listDiv.innerHTML = '<p>No trainers found.</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load trainers:', error);
+            }
+        }
+
+        // Edit trainer
+        function editTrainer(trainerId, trainerNameCurrent) {
+            document.getElementById('edit-trainer-id').value = trainerId;
+            document.getElementById('edit-trainer-name-input').value = trainerNameCurrent;
+            document.getElementById('edit-trainer-password-input').value = '';
+            document.getElementById('edit-trainer-modal').classList.add('active');
+        }
+
+        function closeEditTrainerModal() {
+            document.getElementById('edit-trainer-modal').classList.remove('active');
+            document.getElementById('edit-trainer-error').style.display = 'none';
+            document.getElementById('edit-trainer-success').style.display = 'none';
+        }
+
+        document.getElementById('edit-trainer-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const trainerId = document.getElementById('edit-trainer-id').value;
+            const trainerNameInput = document.getElementById('edit-trainer-name-input').value;
+            const password = document.getElementById('edit-trainer-password-input').value;
+            
+            const errorDiv = document.getElementById('edit-trainer-error');
+            const successDiv = document.getElementById('edit-trainer-success');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const body = { trainer_name: trainerNameInput };
+                if (password) {
+                    body.password = password;
+                }
+                
+                const response = await fetch(`/api/admin/trainer/${trainerId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successDiv.textContent = data.message;
+                    successDiv.style.display = 'block';
+                    setTimeout(() => {
+                        closeEditTrainerModal();
+                        loadTrainers();
+                    }, 1500);
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Delete trainer
+        async function deleteTrainer(trainerId) {
+            if (!confirm('Are you sure you want to delete this trainer? All their projects will also be deleted.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/trainer/${trainerId}`, {
+                    method: 'DELETE',
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadTrainers();
+                } else {
+                    alert('Failed to delete trainer');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Load admin projects
+        async function loadAdminProjects() {
+            try {
+                const response = await fetch('/api/admin/projects');
+                const data = await response.json();
+                
+                const listDiv = document.getElementById('admin-projects-list');
+                
+                if (data.success && Object.keys(data.projects).length > 0) {
+                    let html = '';
+                    
+                    for (const [trainerNameKey, projects] of Object.entries(data.projects)) {
+                        html += `<div class="trainer-group">`;
+                        html += `<h4>Trainer: ${trainerNameKey}</h4>`;
+                        html += '<table><thead><tr><th>Date</th><th>Project Name</th><th>Project Details</th><th>Remarks</th><th>Actions</th></tr></thead><tbody>';
+                        
+                        projects.forEach(project => {
+                            html += `
+                                <tr>
+                                    <td>${project.date}</td>
+                                    <td>${project.project_name}</td>
+                                    <td>${project.project_details}</td>
+                                    <td>${project.remarks}</td>
+                                    <td class="actions">
+                                        <button onclick="editAdminProject('${project._id}', '${project.date}', '${project.project_name.replace(/'/g, "\\'")}', '${project.project_details.replace(/'/g, "\\'")}', '${project.remarks.replace(/'/g, "\\'")}', true)" class="btn btn-edit">Edit</button>
+                                        <button onclick="deleteAdminProject('${project._id}')" class="btn btn-danger">Delete</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        
+                        html += '</tbody></table></div>';
+                    }
+                    
+                    listDiv.innerHTML = html;
+                } else {
+                    listDiv.innerHTML = '<p>No projects found.</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load projects:', error);
+            }
+        }
+
+        // Delete admin project
+        async function deleteAdminProject(projectId) {
+            if (!confirm('Are you sure you want to delete this project?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/project/${projectId}`, {
+                    method: 'DELETE',
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadAdminProjects();
+                } else {
+                    alert('Failed to delete project');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Calendar functions
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('current-month-year').textContent = 
+                `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
+            
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            const calendarDiv = document.getElementById('calendar');
+            calendarDiv.innerHTML = '';
+            
+            // Add weekday headers
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdays.forEach(day => {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-weekday';
+                dayDiv.textContent = day;
+                calendarDiv.appendChild(dayDiv);
+            });
+            
+            // Add empty cells for days before the first day
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'calendar-day empty';
+                calendarDiv.appendChild(emptyDiv);
+            }
+            
+            // Add days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                dayDiv.textContent = day;
+                dayDiv.onclick = () => selectDate(year, month, day);
+                calendarDiv.appendChild(dayDiv);
+            }
+        }
+
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function selectDate(year, month, day) {
+            selectedDate = new Date(year, month, day);
+            const dateString = selectedDate.toISOString().split('T')[0];
+            
+            document.getElementById('project-date').value = dateString;
+            document.getElementById('display-date').value = selectedDate.toLocaleDateString();
+            document.getElementById('project-id').value = '';
+            document.getElementById('project-name').value = '';
+            document.getElementById('project-details').value = '';
+            document.getElementById('project-remarks').value = '';
+            
+            document.getElementById('project-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('project-modal').classList.remove('active');
+            document.getElementById('modal-error-message').style.display = 'none';
+            document.getElementById('modal-success-message').style.display = 'none';
+        }
+
+        // Submit project
+        document.getElementById('project-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const date = document.getElementById('project-date').value;
+            const projectName = document.getElementById('project-name').value;
+            const projectDetails = document.getElementById('project-details').value;
+            const remarks = document.getElementById('project-remarks').value;
+            
+            const errorDiv = document.getElementById('modal-error-message');
+            const successDiv = document.getElementById('modal-success-message');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/user/projects', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date,
+                        project_name: projectName,
+                        project_details: projectDetails,
+                        remarks
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successDiv.textContent = data.message;
+                    successDiv.style.display = 'block';
+                    setTimeout(() => {
+                        closeModal();
+                        loadUserProjects();
+                    }, 1500);
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Load user projects
+        async function loadUserProjects() {
+            try {
+                const response = await fetch('/api/user/projects');
+                const data = await response.json();
+                
+                const listDiv = document.getElementById('user-projects-list');
+                
+                if (data.success && Object.keys(data.projects).length > 0) {
+                    let html = '';
+                    
+                    for (const [projectNameKey, projects] of Object.entries(data.projects)) {
+                        html += `<div class="project-group">`;
+                        html += `<h4>Project: ${projectNameKey}</h4>`;
+                        html += '<table><thead><tr><th>Date</th><th>Project Name</th><th>Project Details</th><th>Remarks</th><th>Actions</th></tr></thead><tbody>';
+                        
+                        projects.forEach(project => {
+                            html += `
+                                <tr>
+                                    <td>${project.date}</td>
+                                    <td>${project.project_name}</td>
+                                    <td>${project.project_details}</td>
+                                    <td>${project.remarks}</td>
+                                    <td class="actions">
+                                        <button onclick="editAdminProject('${project._id}', '${project.date}', '${project.project_name.replace(/'/g, "\\'")}', '${project.project_details.replace(/'/g, "\\'")}', '${project.remarks.replace(/'/g, "\\'")}', false)" class="btn btn-edit">Edit</button>
+                                        <button onclick="deleteUserProject('${project._id}')" class="btn btn-danger">Delete</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                        
+                        html += '</tbody></table></div>';
+                    }
+                    
+                    listDiv.innerHTML = html;
+                } else {
+                    listDiv.innerHTML = '<p>No projects found.</p>';
+                }
+            } catch (error) {
+                console.error('Failed to load projects:', error);
+            }
+        }
+
+        // Edit project (both admin and user)
+        function editAdminProject(projectId, date, projectName, projectDetails, remarks, isAdmin) {
+            document.getElementById('edit-project-id-input').value = projectId;
+            document.getElementById('edit-project-date').value = date;
+            document.getElementById('edit-project-name-input').value = projectName;
+            document.getElementById('edit-project-details-input').value = projectDetails;
+            document.getElementById('edit-project-remarks-input').value = remarks;
+            document.getElementById('edit-project-form').dataset.isAdmin = isAdmin;
+            document.getElementById('edit-project-modal').classList.add('active');
+        }
+
+        function closeEditProjectModal() {
+            document.getElementById('edit-project-modal').classList.remove('active');
+            document.getElementById('edit-project-error').style.display = 'none';
+            document.getElementById('edit-project-success').style.display = 'none';
+        }
+
+        document.getElementById('edit-project-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const projectId = document.getElementById('edit-project-id-input').value;
+            const date = document.getElementById('edit-project-date').value;
+            const projectName = document.getElementById('edit-project-name-input').value;
+            const projectDetails = document.getElementById('edit-project-details-input').value;
+            const remarks = document.getElementById('edit-project-remarks-input').value;
+            const isAdmin = document.getElementById('edit-project-form').dataset.isAdmin === 'true';
+            
+            const errorDiv = document.getElementById('edit-project-error');
+            const successDiv = document.getElementById('edit-project-success');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            
+            try {
+                const endpoint = isAdmin ? `/api/admin/project/${projectId}` : `/api/user/project/${projectId}`;
+                
+                const response = await fetch(endpoint, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date,
+                        project_name: projectName,
+                        project_details: projectDetails,
+                        remarks
+                    }),
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    successDiv.textContent = data.message;
+                    successDiv.style.display = 'block';
+                    setTimeout(() => {
+                        closeEditProjectModal();
+                        if (isAdmin) {
+                            loadAdminProjects();
+                        } else {
+                            loadUserProjects();
+                        }
+                    }, 1500);
+                } else {
+                    errorDiv.textContent = data.message;
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                errorDiv.textContent = 'An error occurred. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        });
+
+        // Delete user project
+        async function deleteUserProject(projectId) {
+            if (!confirm('Are you sure you want to delete this project?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/user/project/${projectId}`, {
+                    method: 'DELETE',
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadUserProjects();
+                } else {
+                    alert('Failed to delete project');
+                }
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Export to CSV
+        function exportToCSV(type) {
+            if (type === 'admin') {
+                exportAdminProjectsToCSV();
+            } else {
+                exportUserProjectsToCSV();
+            }
+        }
+
+        async function exportAdminProjectsToCSV() {
+            try {
+                const response = await fetch('/api/admin/projects');
+                const data = await response.json();
+                
+                if (!data.success || Object.keys(data.projects).length === 0) {
+                    alert('No projects to export');
+                    return;
+                }
+                
+                let csv = 'Trainer Name,Date,Project Name,Project Details,Remarks\n';
+                
+                for (const [trainerNameKey, projects] of Object.entries(data.projects)) {
+                    projects.forEach(project => {
+                        csv += `"${trainerNameKey}","${project.date}","${project.project_name}","${project.project_details}","${project.remarks}"\n`;
+                    });
+                }
+                
+                downloadCSV(csv, 'admin_projects.csv');
+            } catch (error) {
+                alert('Failed to export projects');
+            }
+        }
+
+        async function exportUserProjectsToCSV() {
+            try {
+                const response = await fetch('/api/user/projects');
+                const data = await response.json();
+                
+                if (!data.success || Object.keys(data.projects).length === 0) {
+                    alert('No projects to export');
+                    return;
+                }
+                
+                let csv = 'Date,Project Name,Project Details,Remarks\n';
+                
+                for (const [projectNameKey, projects] of Object.entries(data.projects)) {
+                    projects.forEach(project => {
+                        csv += `"${project.date}","${project.project_name}","${project.project_details}","${project.remarks}"\n`;
+                    });
+                }
+                
+                downloadCSV(csv, 'my_projects.csv');
+            } catch (error) {
+                alert('Failed to export projects');
+            }
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Initialize
+        checkSession();
+    </script>
+</body>
+</html>
+
