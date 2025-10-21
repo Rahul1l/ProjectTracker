@@ -75,6 +75,7 @@ def create_trainer():
     trainer = {
         'trainer_name': trainer_name,
         'password': hashed_password,
+        'password_plaintext': password,  # Store plaintext for admin viewing
         'created_at': datetime.now()
     }
     
@@ -87,7 +88,7 @@ def get_trainers():
     if not session.get('admin_logged_in'):
         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
     
-    trainers = list(trainers_collection.find({}, {'password': 0}))
+    trainers = list(trainers_collection.find({}, {'password': 0}))  # Exclude hashed password only
     for trainer in trainers:
         trainer['_id'] = str(trainer['_id'])
         trainer['created_at'] = trainer['created_at'].strftime('%Y-%m-%d %H:%M:%S')
@@ -115,6 +116,7 @@ def manage_trainer(trainer_id):
         
         if 'password' in data and data['password']:
             update_data['password'] = generate_password_hash(data['password'])
+            update_data['password_plaintext'] = data['password']  # Store plaintext for admin viewing
         
         trainers_collection.update_one(
             {'_id': ObjectId(trainer_id)},

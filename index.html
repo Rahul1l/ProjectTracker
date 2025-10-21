@@ -753,6 +753,17 @@
             });
             document.getElementById(viewId).classList.add('active');
             
+            // Clear login forms when showing login views
+            if (viewId === 'admin-login-view') {
+                document.getElementById('admin-login-form').reset();
+                document.getElementById('admin-error-message').style.display = 'none';
+                document.getElementById('admin-success-message').style.display = 'none';
+            } else if (viewId === 'user-login-view') {
+                document.getElementById('user-login-form').reset();
+                document.getElementById('user-error-message').style.display = 'none';
+                document.getElementById('user-success-message').style.display = 'none';
+            }
+            
             // Load data when switching to certain views
             if (viewId === 'admin-dashboard-view') {
                 loadTrainers();
@@ -811,6 +822,7 @@
                     successDiv.style.display = 'block';
                     currentUserType = 'admin';
                     setTimeout(() => {
+                        document.getElementById('admin-login-form').reset();
                         showView('admin-dashboard-view');
                     }, 1000);
                 } else {
@@ -852,6 +864,7 @@
                     trainerName = data.trainer_name;
                     document.getElementById('trainer-name-display').textContent = trainerName;
                     setTimeout(() => {
+                        document.getElementById('user-login-form').reset();
                         showView('user-dashboard-view');
                     }, 1000);
                 } else {
@@ -870,6 +883,17 @@
                 await fetch('/api/logout', { method: 'POST' });
                 currentUserType = null;
                 trainerName = null;
+                
+                // Clear all login forms
+                document.getElementById('admin-login-form').reset();
+                document.getElementById('user-login-form').reset();
+                
+                // Clear any error/success messages
+                document.getElementById('admin-error-message').style.display = 'none';
+                document.getElementById('admin-success-message').style.display = 'none';
+                document.getElementById('user-error-message').style.display = 'none';
+                document.getElementById('user-success-message').style.display = 'none';
+                
                 showView('home-view');
             } catch (error) {
                 console.error('Logout failed:', error);
@@ -943,12 +967,14 @@
                 const listDiv = document.getElementById('trainers-list');
                 
                 if (data.success && data.trainers.length > 0) {
-                    let html = '<table><thead><tr><th>Trainer Name</th><th>Created At</th><th>Actions</th></tr></thead><tbody>';
+                    let html = '<table><thead><tr><th>Trainer Name</th><th>Password</th><th>Created At</th><th>Actions</th></tr></thead><tbody>';
                     
                     data.trainers.forEach(trainer => {
+                        const password = trainer.password_plaintext || '********';
                         html += `
                             <tr>
                                 <td>${trainer.trainer_name}</td>
+                                <td>${password}</td>
                                 <td>${trainer.created_at}</td>
                                 <td class="actions">
                                     <button onclick="editTrainer('${trainer._id}', '${trainer.trainer_name}')" class="btn btn-edit">Edit</button>
@@ -1167,7 +1193,9 @@
 
         function selectDate(year, month, day) {
             selectedDate = new Date(year, month, day);
-            const dateString = selectedDate.toISOString().split('T')[0];
+            
+            // Format date as YYYY-MM-DD without timezone conversion
+            const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             
             document.getElementById('project-date').value = dateString;
             document.getElementById('display-date').value = selectedDate.toLocaleDateString();
